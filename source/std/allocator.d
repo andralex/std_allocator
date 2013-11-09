@@ -236,9 +236,11 @@ version(unittest) import std.stdio;
 /*
 Tristate by Timon Gehr and Andrei Alexandrescu.
 */
-private struct Tristate{
+private struct Tristate
+{
     private ubyte value;
-    private static Tristate make(ubyte b){
+    private static Tristate make(ubyte b)
+    {
         Tristate r = void;
         r.value = b;
         return r;
@@ -250,20 +252,24 @@ private struct Tristate{
 
     void opAssign(bool b) { value = b << 1; }
 
-    Tristate opUnary(string s)() if (s == "~"){
-        return make((193>>value&3)<<1);
+    Tristate opUnary(string s)() if (s == "~")
+    {
+        return make((193 >> value & 3) << 1);
     }
 
-    Tristate opBinary(string s)(Tristate rhs) if (s == "|"){
-        return make((12756>>(value+rhs.value)&3)<<1);
+    Tristate opBinary(string s)(Tristate rhs) if (s == "|")
+    {
+        return make((12756 >> (value + rhs.value) & 3) << 1);
     }
 
-    Tristate opBinary(string s)(Tristate rhs) if (s == "&"){
-        return make((13072>>(value+rhs.value)&3)<<1);
+    Tristate opBinary(string s)(Tristate rhs) if (s == "&")
+    {
+        return make((13072 >> (value + rhs.value) & 3) << 1);
     }
 
-    Tristate opBinary(string s)(Tristate rhs) if (s == "^"){
-        return make((13252>>(value+rhs.value)&3)<<1);
+    Tristate opBinary(string s)(Tristate rhs) if (s == "^")
+    {
+        return make((13252 >> (value + rhs.value) & 3) << 1);
     }
 }
 
@@ -328,17 +334,13 @@ unittest
     a = false;
     assert(a == Tristate.no);
     a = Tristate.unknown;
+    assert(a == Tristate.unknown);
     Tristate b;
     b = a;
     assert(b == a);
-    auto c = a | b;
-    assert(c == Tristate.unknown);
-    assert((a & b) == Tristate.unknown);
-    a = true;
-    assert(~a == Tristate.no);
-    a = true;
-    b = false;
-    assert((a ^ b) == Tristate.yes);
+    assert(~Tristate.yes == Tristate.no);
+    assert(~Tristate.no == Tristate.yes);
+    assert(~Tristate.unknown == Tristate.unknown);
 }
 
 /**
@@ -2265,7 +2267,7 @@ private struct BasicRegion(uint minAlign = platformAlignment)
     The postblit of $(D BasicRegion) is disabled because such objects should not
     be copied around naively.
     */
-    @disable this(this);
+    //@disable this(this);
 
     /**
     Standard allocator primitives.
