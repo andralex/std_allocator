@@ -1,0 +1,23 @@
+{
+	"name": "std_allocator",
+	"description": "Phobos std.allocator candidate",
+	"homepage": "http://erdani.com",
+	"copyright": "Copyright © 2013-, Andrei Alexandrescu",
+	"authors": [
+		"Andrei Alexandrescu"
+	],
+	"dependencies": {
+	},
+	"configurations": [
+	{
+		"name": "library",
+		"targetType": "library",
+	},
+	{
+		"name": "unittest",
+		"targetType": "executable",
+		"targetName": "unittest",
+		"dflags": ["-main"],
+	},
+	],
+}
