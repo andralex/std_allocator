@@ -2704,22 +2704,27 @@ enum Options : uint
     */
     callerFile = 1u << 19,
     /**
+    Instructs $(D AllocatorWithStats) to store the caller $(D __FUNCTION__) for
+    each allocation.
+    */
+    callerFunction = 1u << 20,
+    /**
     Instructs $(D AllocatorWithStats) to store the caller's line for each
     allocation.
     */
-    callerLine = 1u << 20,
+    callerLine = 1u << 21,
     /**
     Instructs $(D AllocatorWithStats) to store the time of each allocation.
     */
-    callerTime = 1u << 21,
+    callerTime = 1u << 22,
     /**
     Chooses all $(D callerXxx) flags.
     */
-    callerAll = ((1u << 22) - 1) & ~numAll & ~bytesAll,
+    callerAll = ((1u << 23) - 1) & ~numAll & ~bytesAll,
     /**
     Combines all flags above.
     */
-    all = (1u << 22) - 1
+    all = (1u << 23) - 1
 }
 
 /**
@@ -2841,7 +2846,9 @@ private:
     {
         /**
         Per-allocation information that can be iterated upon by using
-        $(D byAllocation).
+        $(D byAllocation). This only tracks live allocations and is useful for
+        e.g. tracking memory leaks.
+
         Example:
         ----
         AllocatorWithStats!(Mallocator, Options.all) a;
@@ -2868,6 +2875,8 @@ private:
             /// Ditto
             @property uint callerLine() const;
             /// Ditto
+            @property uint callerFunction() const;
+            /// Ditto
             @property const(SysTime) callerTime() const;
         }
     }
@@ -2876,7 +2885,8 @@ private:
         public struct AllocationInfo
         {
             import std.datetime;
-            mixin(define("string", "callerModule", "callerFile"));
+            mixin(define("string", "callerModule", "callerFile",
+                "callerFunction"));
             mixin(define("uint", "callerLine"));
             mixin(define("size_t", "callerSize"));
             mixin(define("SysTime", "callerTime"));
@@ -2885,7 +2895,7 @@ private:
         AllocationInfo* _root;
         alias MyAllocator = AffixAllocator!(Allocator, AllocationInfo);
 
-        auto byAllocation()
+        public auto byAllocation()
         {
             struct Voldemort
             {
@@ -2924,7 +2934,8 @@ public:
     }
 
     void[] allocate
-        (string m = __MODULE__, string f = __FILE__, ulong n = __LINE__)
+        (string m = __MODULE__, string f = __FILE__, ulong n = __LINE__,
+            string fun = __FUNCTION__)
         (size_t bytes)
     {
         up!"numAllocate";
@@ -2946,6 +2957,8 @@ public:
                 p._callerModule = m;
             static if (flags & Options.callerFile)
                 p._callerFile = f;
+            static if (flags & Options.callerFunction)
+                p._callerFunction = fun;
             static if (flags & Options.callerLine)
                 p._callerLine = n;
             static if (flags & Options.callerTime)
